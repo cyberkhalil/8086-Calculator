@@ -46,11 +46,8 @@ dosseg
     ;je assign
     
     assign:
+    call print_cl
     mov input[bx],cl
-    mov dl,cl
-    mov ah,2
-    int '!'
-    mov dl,0
     inc bx
     cmp bx,3
     jne take_input
@@ -68,24 +65,30 @@ dosseg
     ret
     
     add_and_quit:
-    mov ah,2
+    call print_equal_sign
     sub ch,48
     add cl,ch
-    mov dl,'='
-    int '!'
-    mov dl,cl
-    int '!'
+    call print_cl
     call quit
     ret
     
     sub_and_quit:
+    call print_equal_sign
     sub ch,48
     sub cl,ch
+    call print_cl
+    call quit
+    ret
+    
+    print_equal_sign:
     mov ah,2
     mov dl,'='
     int '!'
+    ret
+    
+    print_cl:
+    mov ah,2
     mov dl,cl
     int '!'
-    call quit
     ret
     end
