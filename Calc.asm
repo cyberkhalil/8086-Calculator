@@ -21,7 +21,7 @@ take_input:                        ; loop to take input and print dl for each le
     cmp bx,1        ; if it's the second character then it's opreation
     je check_opreation
 
-    call check_number
+    call check_cl_number
     cmp al,1
     je assign
     jmp print_error_and_quit
@@ -71,7 +71,7 @@ adding:
     add cl,ch
     mov ch,'0' ; ch will be used as 10's number
 check_sum:
-    call check_number
+    call check_cl_number
     cmp al,1
     je print_sum
     inc ch
@@ -92,6 +92,17 @@ subtracting:
     call print_equal_sign
     sub ch,'0'
     sub cl,ch
+    call check_cl_number
+    cmp al,1
+    je print_sub
+    mov bh,cl
+    mov cl,'-'
+    call print_cl
+    mov cl,':'     ; ':' = '9'+1
+    sub bh,'0'    ; make bh contains exact number
+    add bh,10   ; add 10 to get number in positive in next instruction
+    sub cl,bh     ; remove bh from cl to get positive number in cl
+print_sub:
     call print_cl
     jmp quit
     
@@ -107,7 +118,7 @@ print_cl:
     int '!'
     ret
 
-check_number: ; check if the CL is a number if so return 1 in AL else return 0 in AL
+check_cl_number: ; check if the CL is a number if so return 1 in AL else return 0 in AL
     cmp cl,'0'
     jb not_number
     cmp cl,'9'
