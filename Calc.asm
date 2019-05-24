@@ -21,14 +21,11 @@ take_input:                        ; loop to take input and print dl for each le
     cmp bx,1        ; if it's the second character then it's opreation
     je check_opreation
 
-check_number: ; check if the input is a number (more or equal to 0 and less or equal to 9)
-    cmp cl,'0'
-    jb print_error_and_quit          ; to stop looping if error
-    cmp cl,'9'
-    ja print_error_and_quit          ; to stop looping if error
-    jmp assign
-
-check_opreation:
+    call check_number
+    cmp al,1
+    je assign
+    jmp print_error_and_quit
+check_opreation:    ; to check if the input operation is a supported one
     cmp cl,'+'
     je assign
     cmp cl,'-'
@@ -70,14 +67,30 @@ quit: ; Quit the program
     
 adding:
     call print_equal_sign
-    sub ch,48
+    sub ch,'0'
     add cl,ch
+    mov ch,'0' ; ch will be used as 10's number
+check_sum:
+    call check_number
+    cmp al,1
+    je print_sum
+    inc ch
+    sub cl,10
+    jmp check_sum
+print_sum:
+    cmp ch,'0'
+    je print_units
+    mov bh,cl
+    mov cl,ch
+    call print_cl
+    mov cl,bh
+print_units:
     call print_cl
     jmp quit
     
 subtracting:
     call print_equal_sign
-    sub ch,48
+    sub ch,'0'
     sub cl,ch
     call print_cl
     jmp quit
@@ -92,5 +105,16 @@ print_cl:
     mov ah,2
     mov dl,cl
     int '!'
+    ret
+
+check_number: ; check if the CL is a number if so return 1 in AL else return 0 in AL
+    cmp cl,'0'
+    jb not_number
+    cmp cl,'9'
+    ja not_number
+    mov al,1
+    ret
+not_number:
+    mov al,0
     ret
 end
