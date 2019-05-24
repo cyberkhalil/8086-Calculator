@@ -4,6 +4,7 @@ dosseg
 .data
     greating_msg db "Welcome in 8086-Calculator type simple equations to solve",10,"   Examples : 1+1 or 5*8",10,"$"
     error_msg db 10,"Exit due error$"
+    division_reminder_msg db " and remainder=$"
     input db 3 DUP('0')
 
 .code
@@ -33,8 +34,8 @@ check_cl_opreation:    ; to check if the input operation is a supported one
     je assign
     cmp cl,'*'
     je assign
-    ;cmp cl,'/'     ; TODO support div opration
-    ;je assign
+    cmp cl,'/'
+    je assign
     jmp print_error_and_quit
 
 assign:
@@ -54,8 +55,8 @@ calculate_input:
     je subtracting
     cmp bl,'*'
     je multiplying
-    ;cmp bl,'/'         ; TODO support div oprations
-    ;je dividing
+    cmp bl,'/'
+    je dividing
 print_error_and_quit:
     mov ah,9
     mov dx,offset error_msg
@@ -119,7 +120,29 @@ print_cx:
 print_units:
     call print_cl
     jmp quit
-    
+
+dividing:
+    call print_equal_sign
+    sub cl,'0'                      ; to use the real value of cl not '0'+value
+    sub ch,'0'                     ; to use the real value of ch not '0'+value
+    mov ah,0                    ; clear ah to use ax in division
+    mov al,cl
+    mov bl,ch
+    div bl
+    mov ch,ah
+    mov cl,al
+    add cl,'0'
+    call print_cl
+    mov ah,9
+    cmp ch,0
+    je quit_division
+    mov dx,offset division_reminder_msg
+    int '!'         ; '!' = 21h
+    mov cl,ch
+    add cl,'0'
+    call print_cl
+quit_division:
+    jmp quit
 
 print_equal_sign:
     mov ah,2
