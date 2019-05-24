@@ -25,9 +25,27 @@ dosseg
     mov ah,8
     int '!'
     mov cl,al
-    cmp cl,13                          ; 13 in decimal is the ascii for enter
-    ; TODO check if input is number
-    je quit_take_input                 ; to stop looping
+    cmp bx,1
+    je check_opreation
+    cmp cl,48                          ; 13 in decimal is the ascii for enter
+    jb quit_take_input                 ; to stop looping
+    cmp cl,57
+    ja quit_take_input
+    jmp assign
+    
+    check_opreation:
+    cmp cl,'+'
+    je assign
+    cmp cl,'-'
+    je assign
+    
+    ; TODO support the following oprations
+    ;cmp cl,'*'
+    ;je assign
+    ;cmp cl,'/'
+    ;je assign
+    
+    assign:
     mov input[bx],cl
     mov dl,cl
     mov ah,2
