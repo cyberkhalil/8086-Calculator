@@ -1,9 +1,11 @@
 dosseg
 .model small
+
 .data
     greating_msg db "Welcome in 8086-Calculator type simple equations to solve",10,"   Examples : 1+1 or 5*8",10,"$"
     error_msg db 10,"Exit due error$"
     input db 3 DUP('0')
+
 .code
     ; printing greating_msg
     mov dx,@data ;move offsets to data segment
@@ -19,20 +21,19 @@ take_input:                        ; loop to take input and print dl for each le
     int '!'
     mov cl,al
     cmp bx,1        ; if it's the second character then it's opreation
-    je check_opreation
-
+    je check_cl_opreation
     call check_cl_number
     cmp al,1
     je assign
     jmp print_error_and_quit
-check_opreation:    ; to check if the input operation is a supported one
+check_cl_opreation:    ; to check if the input operation is a supported one
     cmp cl,'+'
     je assign
     cmp cl,'-'
     je assign
-    ;cmp cl,'*' ; TODO support the following oprations
-    ;je assign
-    ;cmp cl,'/'
+    cmp cl,'*'
+    je assign
+    ;cmp cl,'/'     ; TODO support div opration
     ;je assign
     jmp print_error_and_quit
 
@@ -51,10 +52,9 @@ calculate_input:
     je adding
     cmp bl,'-'
     je subtracting
-    ; TODO support the following oprations
-    ;cmp bl,'*'
-    ;je multiplying
-    ;cmp bl,'/'
+    cmp bl,'*'
+    je multiplying
+    ;cmp bl,'/'         ; TODO support div oprations
     ;je dividing
 print_error_and_quit:
     mov ah,9
@@ -70,23 +70,7 @@ adding:
     sub ch,'0'
     add cl,ch
     mov ch,'0' ; ch will be used as 10's number
-check_sum:
-    call check_cl_number
-    cmp al,1
-    je print_sum
-    inc ch
-    sub cl,10
-    jmp check_sum
-print_sum:
-    cmp ch,'0'
-    je print_units
-    mov bh,cl
-    mov cl,ch
-    call print_cl
-    mov cl,bh
-print_units:
-    call print_cl
-    jmp quit
+    jmp check_and_print_cx
     
 subtracting:
     call print_equal_sign
@@ -105,7 +89,38 @@ subtracting:
 print_sub:
     call print_cl
     jmp quit
+
+multiplying:
+    call print_equal_sign
+    sub ch,'0'
+    sub cl,'0'
+    mov al,ch
+    mul cl
+    mov cl,al
+    mov ch,ah
+    add cl,'0'
+    add ch,'0'
+    call check_and_print_cx
     
+check_and_print_cx:
+    call check_cl_number
+    cmp al,1
+    je print_cx
+    inc ch
+    sub cl,10
+    jmp check_and_print_cx
+print_cx:
+    cmp ch,'0'
+    je print_units
+    mov bh,cl ; using bh as temp
+    mov cl,ch
+    call print_cl
+    mov cl,bh
+print_units:
+    call print_cl
+    jmp quit
+    
+
 print_equal_sign:
     mov ah,2
     mov dl,'='
